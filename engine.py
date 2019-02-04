@@ -1,12 +1,18 @@
 import tcod as libt
+
+from entity import Entity
 from input_handlers import handle_keys
+from render_functions import clear_all, render_all
 
 def main():
     screen_width = 80
     screen_height = 50
+    map_width = 80
+    map_height = 45
 
-    player_x = int(screen_width / 2)
-    player_y = int(screen_height / 2)
+    player = Entity(int(screen_width / 2), int(screen_height / 2), '@', libt.white)
+    npc = Entity(int(screen_width / 2 - 5), int(screen_height / 2), '@', libt.yellow)
+    entities = [npc, player]
 
     libt.console_set_custom_font('consolas10x10_gs_tc.png', libt.FONT_TYPE_GREYSCALE | libt.FONT_LAYOUT_TCOD)
 
@@ -19,12 +25,11 @@ def main():
 
     while not libt.console_is_window_closed():
         libt.sys_check_for_event(libt.EVENT_KEY_PRESS, key, mouse)
-        libt.console_set_default_foreground(con, libt.white)
-        libt.console_put_char(con, player_x, player_y, '@', libt.BKGND_NONE)
-        libt.console_blit(con, 0, 0, screen_width, screen_height, 0, 0, 0)
+
+        render_all(con, entities, screen_width, screen_height)
         libt.console_flush()
 
-        libt.console_put_char(con, player_x, player_y, ' ', libt.BKGND_NONE)
+        clear_all(con, entities)
 
         action = handle_keys(key)
         move = action.get('move')
@@ -33,8 +38,7 @@ def main():
 
         if move:
             dx, dy = move
-            player_x += dx
-            player_y += dy
+            player.move(dx, dy)
 
         if exit:
             return True
