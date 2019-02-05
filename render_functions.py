@@ -1,16 +1,23 @@
 import tcod as libt
 
-def render_all(con, entities, game_map, screen_width, screen_height, colors):
-    # draw all the tiles in the game map
-    for y in range(game_map.height):
-        for x in range(game_map.width):
-            wall = game_map.tiles[x][y].block_sight
+def render_all(con, entities, game_map, fov_map, fov_recompute, screen_width, screen_height, colors):
+    if fov_recompute:
+        for y in range(game_map.height):
+            for x in range(game_map.width):
+                visible = libt.map_is_in_fov(fov_map, x, y)
+                wall = game_map.tiles[x][y].block_sight
 
-            if wall:
-                libt.console_set_char_background(con, x, y, colors.get('dark_wall'), libt.BKGND_SET)
-            else:
-                libt.console_set_char_background(con, x, y, colors.get('dark_ground'), libt.BKGND_SET)
-
+                if visible:
+                    if wall:
+                        libt.console_set_char_background(con, x, y, colors.get('light_wall'), libt.BKGND_SET)
+                    else:
+                        libt.console_set_char_background(con, x, y, colors.get('light_ground'), libt.BKGND_SET)
+                else:
+                    if wall:
+                        libt.console_set_char_background(con, x, y, colors.get('dark_wall'), libt.BKGND_SET)
+                    else:
+                        libt.console_set_char_background(con, x, y, colors.get('dark_ground'), libt.BKGND_SET)
+    
     # draw all entities in the list
     for entity in entities:
         draw_entity(con, entity)
